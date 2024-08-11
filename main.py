@@ -104,6 +104,9 @@ def get_tags_for_branch(repo, branch_name):
         branch_name = branch_name.replace('origin/','')
     # Регулярное выражение для формата 'X.Y.Z'
     pattern = re.compile(r'^\d+\.\d+\.\d+$')
+    #pattern = re.compile(r'[a-zA-Z_]+\d+\.\d+\.\d+$')
+    #pattern = re.compile(r'^release.*\d+\.\d+\.\d+$')
+    #pattern = re.compile(r'^\d+\.\d+\.\d+$|^release.*\d+\.\d+\.\d+$')
 
     branch = repo.heads[branch_name]  # Получаем объект ветки
     commits_in_branch = list(repo.iter_commits(branch))  # Получаем коммиты в ветке
@@ -206,8 +209,8 @@ def get_unmerged_branches(repo, branch_name):
 
 
 def filter_release_branches(branches):
-    """Возвращает список строк, содержащих подстроку 'release-'."""
-    return [branch for branch in branches if ('release-' in branch)]
+    """Возвращает список строк, содержащих подстроку 'release'."""
+    return [branch for branch in branches if ('release' in branch)]
 
 
 def get_file_from_repo(repo, file_name):
@@ -254,7 +257,7 @@ def get_service_git_info(service_name, df):
         if switch_to_branch(repo, branche):
             if GIT_MAIN_BRANCH in branche:
                 separator = ''
-            else: separator = ',\n'
+            else: separator = ',<br>'
 
             repo = update_repo(repo)
             file_content1 = get_file_from_repo(repo, 'build.gradle')
@@ -282,7 +285,7 @@ def get_service_git_info(service_name, df):
             row['latest_tag'] = row['latest_tag'] + separator + branche + ':=' + str(latest_tag)
             print(f"Последний тег:'{latest_tag}'")
 
-    not_merged_branches_str = '\n'.join(not_merged_branch_lst)
+    not_merged_branches_str = '<br>'.join(not_merged_branch_lst)
     row['not_merged_branch_lst'] = row['not_merged_branch_lst'] + not_merged_branches_str
     print(f"\nОтдельные ветки  =  '{not_merged_branches_str}'")
     # Добавление строки с использованием pd.concat()
@@ -319,17 +322,18 @@ def generate_release_html(df):
 
     # Декодируем HTML-спецсимволы
     decoded_html = html.unescape(html_code)
-    decoded_html = str.replace(decoded_html, '\\n', '<br>')
-    decoded_html = str.replace(decoded_html, '\n', '<br>')
+    decoded_html = str.replace(decoded_html, '\\n', '')
+    decoded_html = str.replace(decoded_html, '\n', '')
     decoded_html = str.replace(decoded_html, 'origin/', '')
     decoded_html = str.replace(decoded_html, '"', '')
     decoded_html = str.replace(decoded_html, "'", '"')
-    decoded_html = str.replace(decoded_html, 'class=sfera-link sfera-task sfera-link-style',
-                               'class="sfera-link sfera-task sfera-link-style"')
+    # decoded_html = str.replace(decoded_html, 'class=sfera-link sfera-task sfera-link-style',
+    #                            'class="sfera-link sfera-task sfera-link-style"')
+    # decoded_html = str.replace(decoded_html, '<table border=1 class=dataframe>',
+    #                            '<table class="MsoNormalTable" border="1" cellspacing="0" cellpadding="0" width="1440" data-widthmode="wide" data-lastwidth="1761px" style="border-collapse: collapse; width: 1761px;" id="mce_1">')
     decoded_html = str.replace(decoded_html, '<table border=1 class=dataframe>',
-                               '<table class="MsoNormalTable" border="1" cellspacing="0" cellpadding="0" width="1440" data-widthmode="wide" data-lastwidth="1761px" style="border-collapse: collapse; width: 1761px;" id="mce_1">')
+                               '<table border=1 style="border-collapse: collapse; width: 1800px;" id="mce_1-1723402032896-98" data-rtc-uid="244a0614-0d0b-42fd-b8af-5992e9fb70be">')
 
-    print(decoded_html)
     return decoded_html
 
 
