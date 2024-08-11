@@ -34,7 +34,7 @@ sferaUrlKnowledge2 = config["SFERA"]["sferaUrlKnowledge2"]
 sferaUrlRelations = config["SFERA"]["sferaUrlRelations"]
 sferaUrlEntityViews = config["SFERA"]["sferaUrlEntityViews"]
 sferaUrlSkmbRepos = config["SFERA"]["sferaUrlSkmbRepos"]
-sferaUrlDelete =  config["SFERA"]["sferaUrlDelete"]
+sferaUrlDelete = config["SFERA"]["sferaUrlDelete"]
 
 GIT_LINK = config["GIT"]["GIT_LINK"]
 GIT_PATH = config["GIT"]["GIT_PATH"]
@@ -327,7 +327,8 @@ def generate_release_html(df):
     decoded_html = str.replace(decoded_html, 'class=sfera-link sfera-task sfera-link-style',
                                'class="sfera-link sfera-task sfera-link-style"')
     decoded_html = str.replace(decoded_html, '<table border=1 class=dataframe>',
-                               '<table class="MsoNormalTable" border="1" cellspacing="0" cellpadding="0" width="1440" data-widthmode="wide" data-lastwidth="1761px" style="border-collapse: collapse; width: 1761px;" data-rtc-uid="67d29bf0-31c7-4de5-909d-8cea7a11f75f" id="mce_2">')
+                               '<table class="MsoNormalTable" border="1" cellspacing="0" cellpadding="0" width="1440" data-widthmode="wide" data-lastwidth="1761px" style="border-collapse: collapse; width: 1761px;" id="mce_1">')
+
     print(decoded_html)
     return decoded_html
 
@@ -347,6 +348,18 @@ def replace_release_html(html, page_id):
         raise Exception("Error creating story " + response)
     return json.loads(response.text)
 
+
+def publication_release_html(html, parentPage, page_name):
+    data = {
+        "spaceId": "cbbcfa0b-0542-4407-9e49-61c6aa7caf1b",
+        "parentCid": parentPage,
+        "name": page_name,
+        "content": html
+    }
+    response = session.post(sferaUrlKnowledge2, json=data, verify=False)
+    if response.ok != True:
+        raise Exception("Error creating story " + response)
+    return json.loads(response.text)
 
 def generating_release_page(microservices_lst, page_id):
     # Создаем пустой DataFrame с указанными колонками
@@ -371,18 +384,8 @@ def generating_release_page(microservices_lst, page_id):
     html = generate_release_html(df)
     print(html)
     replace_release_html(html, page_id)
+    #publication_release_html(html, '1263114', 'ОКР.Микросервисы')
 
-
-# Переключаемся на ветку develop
-#switch_to_branch(repo, 'develop')
-# Обновляем ветку
-#update_develop_branch(repo)
-# Получаем не слитые ветки
-# get_latest_tag_without_download(repo_url)
-#latest_tag = get_latest_tag(repo)
-
-
-# Загружаем имена файлов
 
 page_id = '1318737'
 generating_release_page(MICROSERVICES_LST, page_id)
