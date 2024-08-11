@@ -36,17 +36,15 @@ sferaUrlEntityViews = config["SFERA"]["sferaUrlEntityViews"]
 sferaUrlSkmbRepos = config["SFERA"]["sferaUrlSkmbRepos"]
 sferaUrlDelete =  config["SFERA"]["sferaUrlDelete"]
 
+GIT_LINK = config["GIT"]["GIT_LINK"]
+GIT_PATH = config["GIT"]["GIT_PATH"]
+GIT_BRANCH_PREFIX = config["GIT"]["GIT_BRANCH_PREFIX"]
+GIT_MAIN_BRANCH = config["GIT"]["GIT_MAIN_BRANCH"]
+MICROSERVICES_LST = json.loads(config["GIT"]["MICROSERVICES_LST"])
 
 session = requests.Session()
 session.post(sferaUrlLogin, json={"username": devUser, "password": devPassword}, verify=False)
 
-
-GIT_LINK = 'ssh://git@git.sfera.inno.local:7999/SKMB/'
-GIT_PATH = 'C:\\_GIT\\'
-GIT_BRANCH_PREFIX = 'origin/'
-GIT_MAIN_BRANCH = 'develop'
-MICROSERVICES_LST = ['skmb-fin-statements-adapter', 'skmb-pim-adapter', 'skmb-credithistory-reactive-service', 'skmb-monitoring-service', 'skmb-client-profile-adapter']
-#MICROSERVICES_LST = ['skmb-fin-statements-adapter']
 
 def get_repo(repo_url, clone_path):
     """Получает репозиторий из указанного URL или открывает существующий."""
