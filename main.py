@@ -5,6 +5,7 @@ import configparser
 import warnings
 import sys
 import os
+import zipfile
 from git import Repo
 import subprocess
 import re
@@ -62,11 +63,32 @@ def get_repo(repo_url, clone_path):
             print(f"Клонирование репозитория из {repo_url} в {clone_path}...")
             #repo = Repo.clone_from(repo_url, clone_path, branch='develop', single_branch=True)
             repo = Repo.clone_from(repo_url, clone_path, branch='develop')
+            #repo = Repo.clone_from(repo_url, clone_path)
             return repo
         except Exception as e:
             print(f"Ошибка при клонировании репозитория: {e}")
             sys.exit(1)
 
+
+def get_repo_single_master(repo_url, clone_path):
+    """Получает репозиторий из указанного URL или открывает существующий."""
+    if os.path.exists(clone_path):
+        try:
+            print(f"Использование существующего каталога: {clone_path}...")
+            repo = Repo(clone_path)
+            return repo
+        except Exception as e:
+            print(f"Ошибка при открытии существующего репозитория: {e}")
+            sys.exit(1)
+    else:
+        # Клонирование репозитория
+        try:
+            print(f"Клонирование репозитория из {repo_url} в {clone_path}...")
+            repo = Repo.clone_from(repo_url, clone_path, single_branch=True)
+            return repo
+        except Exception as e:
+            print(f"Ошибка при клонировании репозитория: {e}")
+            sys.exit(1)
 
 def update_repo(repo):
     """Обновляет локальный репозиторий из удаленного."""
@@ -292,6 +314,13 @@ def get_service_git_info(service_name, df):
     df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
     return df
 
+def download_service(service_name):
+    clone_path = GIT_PATH + service_name
+    repo_url = GIT_LINK + service_name + '.git'
+    repo = get_repo_single_master(repo_url, clone_path)
+    archive_folder(clone_path, GIT_PATH, exclude=['.git', 'gradle'])
+    return repo
+
 
 def get_version(text1, text2, lib_name):
     pattern1 = r'\S*\s*' + lib_name + '\s*:\s*(\S+)'
@@ -377,6 +406,7 @@ def generating_release_page(microservices_lst, page_id):
         'skmb_monitoring_event_lib'
     ]
     df = pd.DataFrame(columns=columns)
+    df = df.sort_values(by='service')
     for microservice in microservices_lst:
         df = get_service_git_info(microservice, df)
 
@@ -391,7 +421,56 @@ def generating_release_page(microservices_lst, page_id):
     #publication_release_html(html, '1263114', 'ОКР.Микросервисы')
 
 
-page_id = '1318737'
-generating_release_page(MICROSERVICES_LST, page_id)
+def archive_folder(source_folder, output_folder, exclude=[]):
+    # Проверяем, существует ли исходная папка
+    if not os.path.exists(source_folder):
+        print("Исходная папка не найдена.")
+        return
+
+    # Проверяем, существует ли папка для сохранения архивов, если нет - создаем
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+
+    # Получаем имя исходной папки
+    folder_name = os.path.basename(source_folder)
+    zip_index = 1
+    zip_file_name = os.path.join(output_folder, f"{folder_name}_{zip_index}.zip")
+
+    # Создаем первый ZIP-файл
+    zip_file = zipfile.ZipFile(zip_file_name, 'w', zipfile.ZIP_DEFLATED)
+    total_size = 0
+    max_size = 20 * 1024 * 1024  # 20 Мб в байтах
+
+    # Проходим по всем файлам в папке
+    for root, dirs, files in os.walk(source_folder):
+        # Исключаем папки, указанные в параметре exclude
+        dirs[:] = [d for d in dirs if d not in exclude]
+
+        for file in files:
+            file_path = os.path.join(root, file)
+            file_size = os.path.getsize(file_path)
+
+            # Проверяем, не превышает ли добавление файла максимальный размер
+            if total_size + file_size > max_size:
+                zip_file.close()
+                zip_index += 1
+                zip_file_name = os.path.join(output_folder, f"{folder_name}_{zip_index}.zip")
+                zip_file = zipfile.ZipFile(zip_file_name, 'w', zipfile.ZIP_DEFLATED)
+                total_size = 0
+
+            # Добавляем файл в архив
+            zip_file.write(file_path, os.path.relpath(file_path, source_folder))
+            total_size += file_size
+
+    zip_file.close()
+    print(f"Архивирование завершено. Создано {zip_index} архивов в папке: {output_folder}.")
+
+
+
+# page_id = '1318737'
+# generating_release_page(MICROSERVICES_LST, page_id)
+
+for microservice in MICROSERVICES_LST:
+    df = download_service(microservice)
 
 
