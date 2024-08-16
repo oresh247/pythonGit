@@ -70,7 +70,7 @@ def get_repo(repo_url, clone_path):
             sys.exit(1)
 
 
-def get_repo_single_master(repo_url, clone_path):
+def get_repo_single_master(repo_url, clone_path, GIT_MAIN_BRANCH):
     """Получает репозиторий из указанного URL или открывает существующий."""
     if os.path.exists(clone_path):
         try:
@@ -84,7 +84,7 @@ def get_repo_single_master(repo_url, clone_path):
         # Клонирование репозитория
         try:
             print(f"Клонирование репозитория из {repo_url} в {clone_path}...")
-            repo = Repo.clone_from(repo_url, clone_path, single_branch=True)
+            repo = Repo.clone_from(repo_url, clone_path, single_branch=True, branch=GIT_MAIN_BRANCH)
             return repo
         except Exception as e:
             print(f"Ошибка при клонировании репозитория: {e}")
@@ -314,10 +314,10 @@ def get_service_git_info(service_name, df):
     df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
     return df
 
-def download_service(service_name):
+def download_service(service_name, GIT_MAIN_BRANCH):
     clone_path = GIT_PATH + service_name
     repo_url = GIT_LINK + service_name + '.git'
-    repo = get_repo_single_master(repo_url, clone_path)
+    repo = get_repo_single_master(repo_url, clone_path, GIT_MAIN_BRANCH)
     archive_folder(clone_path, GIT_PATH, exclude=['.git', 'gradle'])
     return repo
 
@@ -467,10 +467,33 @@ def archive_folder(source_folder, output_folder, exclude=[]):
 
 
 
-# page_id = '1318737'
-# generating_release_page(MICROSERVICES_LST, page_id)
+page_id = '1318737'
+generating_release_page(MICROSERVICES_LST, page_id)
 
-for microservice in MICROSERVICES_LST:
-    df = download_service(microservice)
+# GIT_MAIN_BRANCH = 'develop'
+# MICROSERVICES_LST = ["bpm-schemes", "grafana-dashboards", "sensitive-data-masking", "skmb-antifraud-service", "skmb-antifraud-ui", "skmb-application-service", "skmb-bpm-service", "skmb-checklist-adapter", "skmb-client-profile-adapter", "skmb-common-config", "skmb-common-settings-controller", "skmb-cre-adapter", "skmb-credithistory-reactive-service", "skmb-credithistory-service", "skmb-currency-service", "skmb-decision-adapter", "skmb-dictionary-service", "skmb-drp-reactive-adapter", "skmb-dto-exchange", "skmb-dwh-reactive-adapter", "skmb-emulator-service", "skmb-etl-adapter", "skmb-event-model-lib", "skmb-fin-statements-adapter", "skmb-front-adapter", "skmb-integration-commons", "skmb-kafka-commons", "skmb-leasing-front-adapter", "skmb-logging-commons", "skmb-manual-verify-adapter", "skmb-monitoring-event-lib", "skmb-monitoring-service", "skmb-moratorium-service", "skmb-notification-adapter", "skmb-okr-reactive-service-v2", "skmb-okr-service", "skmb-pa-db-model", "skmb-pa-db-model-postgres", "skmb-pim-adapter", "skmb-pledge-adapter", "skmb-preapproved-service", "skmb-rbg-adapter", "skmb-reactive-dto", "skmb-revision-service", "skmb-scoring-model-storage", "skmb-spr2", "skmb-spr2-externalcall", "skmb-spr2-proactive", "skmb-spr2-proactive-strategy", "skmb-spr2-reactive", "skmb-spr2-reactive-strategy", "skmb-spr3", "skmb-ui", "skmb-ui-adapter", "skmb-usbs-emulator"]
+#
+# for microservice in MICROSERVICES_LST:
+#     df = download_service(microservice, GIT_MAIN_BRANCH)
+#
+# GIT_MAIN_BRANCH = 'master'
+# MICROSERVICES_LST = ["cr-filegateway", "inventories", "release-policy", "release-policy-bank", "release-policy-leasing", "release-policy-okr", "release-policy-pacl", "release-policy-react", "release-policy-spr", "skmb-istio", "skmb-spr-aist", "skmb-spr-tst-client", "skmb-spr-tst-server"]
+#
+# for microservice in MICROSERVICES_LST:
+#     df = download_service(microservice, GIT_MAIN_BRANCH)
+#
+# GIT_MAIN_BRANCH = 'rkk_scorm'
+# MICROSERVICES_LST = ["keycloak-service"]
+#
+# for microservice in MICROSERVICES_LST:
+#     df = download_service(microservice, GIT_MAIN_BRANCH)
+
+# GIT_MAIN_BRANCH = 'DEV2'
+# MICROSERVICES_LST = ["skmb-integration-test", GIT_MAIN_BRANCH]
+#
+# for microservice in MICROSERVICES_LST:
+#     df = download_service(microservice, GIT_MAIN_BRANCH)
+
+
 
 
