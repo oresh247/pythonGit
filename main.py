@@ -125,7 +125,8 @@ def get_tags_for_branch(repo, branch_name):
     if 'origin/' in branch_name:
         branch_name = branch_name.replace('origin/','')
     # Регулярное выражение для формата 'X.Y.Z'
-    pattern = re.compile(r'^\d+\.\d+\.\d+$')
+    #pattern = re.compile(r'^\d+\.\d+\.\d+$')
+    pattern = re.compile(r'^\d+\.\d+\.\d+(-release)?$')
     #pattern = re.compile(r'[a-zA-Z_]+\d+\.\d+\.\d+$')
     #pattern = re.compile(r'^release.*\d+\.\d+\.\d+$')
     #pattern = re.compile(r'^\d+\.\d+\.\d+$|^release.*\d+\.\d+\.\d+$')
